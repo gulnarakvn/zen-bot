@@ -5,7 +5,6 @@ import httpx
 from pathlib import Path
 from datetime import datetime
 from fastapi import FastAPI, HTTPException
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
 from pydantic import BaseModel
 from typing import Optional
@@ -15,18 +14,41 @@ from rss_builder import build_rss
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHANNEL = os.getenv("TELEGRAM_CHANNEL", "")
+UNSPLASH_ACCESS_KEY = os.getenv("UNSPLASH_ACCESS_KEY", "")
 
-async def send_telegram(text: str, channel: str = None):
+async def get_image_url(query: str) -> str | None:
+    if not UNSPLASH_ACCESS_KEY:
+        return None
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            resp = await client.get(
+                "https://api.unsplash.com/photos/random",
+                params={"query": query, "orientation": "landscape"},
+                headers={"Authorization": f"Client-ID {UNSPLASH_ACCESS_KEY}"}
+            )
+            data = resp.json()
+            return data.get("urls", {}).get("regular")
+    except Exception as e:
+        print(f"[unsplash] error: {e}")
+        return None
+
+async def send_telegram(text: str, channel: str = None, image_url: str = None):
     token = TELEGRAM_BOT_TOKEN
     chat_id = channel or TELEGRAM_CHANNEL
     if not token or not chat_id:
         return
     try:
         async with httpx.AsyncClient(timeout=15) as client:
-            await client.post(
-                f"https://api.telegram.org/bot{token}/sendMessage",
-                json={"chat_id": chat_id, "text": text, "parse_mode": "HTML"}
-            )
+            if image_url:
+                await client.post(
+                    f"https://api.telegram.org/bot{token}/sendPhoto",
+                    json={"chat_id": chat_id, "photo": image_url, "caption": text, "parse_mode": "HTML"}
+                )
+            else:
+                await client.post(
+                    f"https://api.telegram.org/bot{token}/sendMessage",
+                    json={"chat_id": chat_id, "text": text, "parse_mode": "HTML"}
+                )
     except Exception as e:
         print(f"[telegram] error: {e}")
 
@@ -160,7 +182,8 @@ async def run_channel(ch: dict, channels: list):
     tg_channel = ch.get("telegram_channel") or TELEGRAM_CHANNEL
     if tg_channel:
         tg_text = f"<b>{post['title']}</b>\n\n{post['body']}"
-        await send_telegram(tg_text, tg_channel)
+        image_url = await get_image_url(ch["niche"])
+        await send_telegram(tg_text, tg_channel, image_url)
 
     for c in channels:
         if c["id"] == ch["id"]:
