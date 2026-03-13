@@ -1,6 +1,7 @@
 import os
 import json
 import uuid
+import httpx
 from pathlib import Path
 from datetime import datetime
 from fastapi import FastAPI, HTTPException
@@ -12,14 +13,29 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from generator import generate_post
 from rss_builder import build_rss
 
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_CHANNEL = os.getenv("TELEGRAM_CHANNEL", "")
+
+async def send_telegram(text: str, channel: str = None):
+    token = TELEGRAM_BOT_TOKEN
+    chat_id = channel or TELEGRAM_CHANNEL
+    if not token or not chat_id:
+        return
+    try:
+        async with httpx.AsyncClient(timeout=15) as client:
+            await client.post(
+                f"https://api.telegram.org/bot{token}/sendMessage",
+                json={"chat_id": chat_id, "text": text, "parse_mode": "HTML"}
+            )
+    except Exception as e:
+        print(f"[telegram] error: {e}")
+
 app = FastAPI()
 scheduler = AsyncIOScheduler()
 
 CHANNELS_FILE = "channels.json"
 RSS_DIR = Path("rss")
 RSS_DIR.mkdir(exist_ok=True)
-
-# ── helpers ──────────────────────────────────────────────────────────────────
 
 def load_channels():
     if not Path(CHANNELS_FILE).exists():
@@ -30,8 +46,6 @@ def load_channels():
 def save_channels(channels):
     with open(CHANNELS_FILE, "w", encoding="utf-8") as f:
         json.dump(channels, f, ensure_ascii=False, indent=2)
-
-# ── models ───────────────────────────────────────────────────────────────────
 
 class ChannelCreate(BaseModel):
     name: str
@@ -46,8 +60,6 @@ class ChannelUpdate(BaseModel):
     posts_per_day: Optional[int] = None
     tone: Optional[str] = None
     active: Optional[bool] = None
-
-# ── API ───────────────────────────────────────────────────────────────────────
 
 @app.get("/api/channels")
 def get_channels():
@@ -74,7 +86,6 @@ def create_channel(data: ChannelCreate):
     }
     channels.append(channel)
     save_channels(channels)
-    # create initial RSS
     build_rss(channel, [])
     return channel
 
@@ -112,8 +123,6 @@ def get_rss(slug: str):
         raise HTTPException(404)
     return FileResponse(path, media_type="application/rss+xml")
 
-# ── scheduler ─────────────────────────────────────────────────────────────────
-
 async def run_channel(ch: dict, channels: list):
     if not ch.get("active"):
         return
@@ -122,7 +131,6 @@ async def run_channel(ch: dict, channels: list):
         return
 
     rss_path = RSS_DIR / f"{ch['slug']}.xml"
-    # load existing items
     existing = []
     if rss_path.exists():
         try:
@@ -146,10 +154,14 @@ async def run_channel(ch: dict, channels: list):
         "pubDate": datetime.utcnow().strftime("%a, %d %b %Y %H:%M:%S +0000"),
         "guid": uuid.uuid4().hex
     }
-    items = [new_item] + existing[:29]  # keep last 30
+    items = [new_item] + existing[:29]
     build_rss(ch, items)
 
-    # update stats
+    tg_channel = ch.get("telegram_channel") or TELEGRAM_CHANNEL
+    if tg_channel:
+        tg_text = f"<b>{post['title']}</b>\n\n{post['body']}"
+        await send_telegram(tg_text, tg_channel)
+
     for c in channels:
         if c["id"] == ch["id"]:
             c["total_posts"] = c.get("total_posts", 0) + 1
@@ -159,13 +171,11 @@ async def run_channel(ch: dict, channels: list):
 
 async def scheduled_job():
     channels = load_channels()
-    # reset daily counter at midnight UTC
     now = datetime.utcnow()
     if now.hour == 0 and now.minute < 30:
         for ch in channels:
             ch["posts_today"] = 0
         save_channels(channels)
-    # post if needed
     for ch in channels:
         if not ch.get("active"):
             continue
@@ -173,14 +183,12 @@ async def scheduled_job():
         posts_today = ch.get("posts_today", 0)
         if posts_today < posts_per_day:
             await run_channel(ch, channels)
-            channels = load_channels()  # reload after save
+            channels = load_channels()
 
 @app.on_event("startup")
 async def startup():
     scheduler.add_job(scheduled_job, "interval", hours=4, id="main_job")
     scheduler.start()
-
-# ── web panel ─────────────────────────────────────────────────────────────────
 
 @app.get("/", response_class=HTMLResponse)
 def panel():
