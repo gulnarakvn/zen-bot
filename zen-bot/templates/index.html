@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZenFlow — Автопостинг Яндекс Дзен</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --surface: #141414;
+    --surface2: #1a1a1a;
+    --border: #2a2a2a;
+    --accent: #ff6b00;
+    --accent2: #ff9500;
+    --text: #e8e8e8;
+    --muted: #666;
+    --green: #22c55e;
+    --red: #ef4444;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 100;
+  }
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
+  .header-meta { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); }
+
+  /* LAYOUT */
+  .container { max-width: 1200px; margin: 0 auto; padding: 32px; }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 32px;
+  }
+  .stat {
+    background: var(--surface);
+    padding: 20px 24px;
+  }
+  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-family: 'IBM Plex Mono', monospace; margin-bottom: 6px; }
+  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--accent); line-height: 1; }
+  .stat-value.green { color: var(--green); }
+
+  /* SECTION HEADER */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::before { content: '//'; color: var(--accent); }
+
+  /* BUTTON */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .15s;
+    border: none;
+  }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: var(--accent2); }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-danger { background: transparent; color: var(--red); border: 1px solid #2a1515; }
+  .btn-danger:hover { background: #2a1515; }
+  .btn-sm { padding: 5px 10px; font-size: 11px; }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* CHANNEL CARDS */
+  .channels-grid { display: flex; flex-direction: column; gap: 8px; }
+  .channel-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    align-items: center;
+    transition: border-color .2s;
+  }
+  .channel-card:hover { border-color: #333; }
+  .channel-card.inactive { opacity: .5; }
+  .channel-name { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+  .channel-niche { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+  .channel-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .meta-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .meta-tag span { color: var(--text); }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+  }
+  .badge-active { background: #0d2a1a; color: var(--green); border: 1px solid #1a4a2a; }
+  .badge-inactive { background: #2a1a0d; color: #888; border: 1px solid #3a2a1a; }
+  .channel-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+  .rss-link {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    padding: 3px 8px;
+    border-radius: 3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .rss-link:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* MODAL */
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.85);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s;
+  }
+  .overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    width: 480px;
+    max-width: 95vw;
+    transform: translateY(20px);
+    transition: transform .2s;
+  }
+  .overlay.open .modal { transform: translateY(0); }
+  .modal-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 2px;
+    margin-bottom: 24px;
+    color: var(--accent);
+  }
+  .form-group { margin-bottom: 16px; }
+  .form-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-family: 'IBM Plex Mono', monospace; margin-bottom: 6px; display: block; }
+  .form-input, .form-select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    transition: border-color .15s;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  .form-input:focus, .form-select:focus { border-color: var(--accent); }
+  .form-select option { background: var(--surface2); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 24px; justify-content: flex-end; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-size: 13px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all .3s;
+    z-index: 500;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.success { border-left-color: var(--green); }
+  .toast.error { border-left-color: var(--red); }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+  .empty-state-icon { font-size: 48px; margin-bottom: 16px; opacity: .3; }
+  .empty-state-text { font-size: 14px; margin-bottom: 20px; }
+
+  /* LOADING */
+  .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin .6s linear infinite;
+    display: inline-block;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    ZENFLOW
+  </div>
+  <div class="header-meta" id="headerTime">— автопостинг яндекс дзен —</div>
+</header>
+
+<div class="container">
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-label">Каналов</div>
+      <div class="stat-value" id="statChannels">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Активных</div>
+      <div class="stat-value green" id="statActive">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Постов сегодня</div>
+      <div class="stat-value" id="statToday">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Всего постов</div>
+      <div class="stat-value" id="statTotal">0</div>
+    </div>
+  </div>
+
+  <!-- Channels -->
+  <div class="section-header">
+    <div class="section-title">Каналы</div>
+    <button class="btn btn-primary" onclick="openModal()">+ Добавить канал</button>
+  </div>
+  <div class="channels-grid" id="channelsList"></div>
+</div>
+
+<!-- Modal -->
+<div class="overlay" id="overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">НОВЫЙ КАНАЛ</div>
+    <input type="hidden" id="editId">
+    <div class="form-group">
+      <label class="form-label">Название канала</label>
+      <input type="text" class="form-input" id="fieldName" placeholder="Бурение скважин на воду">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Тема / Ниша</label>
+      <input type="text" class="form-input" id="fieldNiche" placeholder="Бурение скважин, водоснабжение частных домов">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Постов в день</label>
+        <select class="form-select" id="fieldPosts">
+          <option value="3">3 поста</option>
+          <option value="4">4 поста</option>
+          <option value="5">5 постов</option>
+          <option value="6" selected>6 постов</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Тон текста</label>
+        <select class="form-select" id="fieldTone">
+          <option>Экспертный</option>
+          <option>Простой</option>
+          <option>Продающий</option>
+          <option>Советующий</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Статус</label>
+      <select class="form-select" id="fieldActive">
+        <option value="true">Активен</option>
+        <option value="false">Приостановлен</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Отмена</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="saveChannel()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+let channels = [];
+
+async function loadChannels() {
+  const res = await fetch('/api/channels');
+  channels = await res.json();
+  renderChannels();
+  updateStats();
+}
+
+function updateStats() {
+  document.getElementById('statChannels').textContent = channels.length;
+  document.getElementById('statActive').textContent = channels.filter(c => c.active).length;
+  document.getElementById('statToday').textContent = channels.reduce((s, c) => s + (c.posts_today || 0), 0);
+  document.getElementById('statTotal').textContent = channels.reduce((s, c) => s + (c.total_posts || 0), 0);
+}
+
+function renderChannels() {
+  const el = document.getElementById('channelsList');
+  if (!channels.length) {
+    el.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">📡</div>
+      <div class="empty-state-text">Каналов пока нет. Добавьте первый!</div>
+    </div>`;
+    return;
+  }
+  el.innerHTML = channels.map(ch => {
+    const lastPost = ch.last_post_at ? new Date(ch.last_post_at).toLocaleString('ru') : 'ещё не было';
+    return `
+    <div class="channel-card ${ch.active ? '' : 'inactive'}">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+          <div class="channel-name">${ch.name}</div>
+          <span class="badge ${ch.active ? 'badge-active' : 'badge-inactive'}">${ch.active ? '● live' : '○ пауза'}</span>
+        </div>
+        <div class="channel-niche">${ch.niche}</div>
+        <div class="channel-meta">
+          <div class="meta-tag">постов/день <span>${ch.posts_per_day}</span></div>
+          <div class="meta-tag">тон <span>${ch.tone}</span></div>
+          <div class="meta-tag">сегодня <span>${ch.posts_today || 0}</span></div>
+          <div class="meta-tag">всего <span>${ch.total_posts || 0}</span></div>
+          <div class="meta-tag">последний <span>${lastPost}</span></div>
+        </div>
+      </div>
+      <div class="channel-actions">
+        <a class="rss-link" href="${ch.rss_url}" target="_blank">⛓ RSS</a>
+        <button class="btn btn-ghost btn-sm" onclick="generateNow('${ch.id}', this)">▶ Пост</button>
+        <button class="btn btn-ghost btn-sm" onclick="editChannel('${ch.id}')">✏</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteChannel('${ch.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openModal(ch = null) {
+  document.getElementById('editId').value = ch ? ch.id : '';
+  document.getElementById('modalTitle').textContent = ch ? 'РЕДАКТИРОВАТЬ' : 'НОВЫЙ КАНАЛ';
+  document.getElementById('fieldName').value = ch ? ch.name : '';
+  document.getElementById('fieldNiche').value = ch ? ch.niche : '';
+  document.getElementById('fieldPosts').value = ch ? ch.posts_per_day : '6';
+  document.getElementById('fieldTone').value = ch ? ch.tone : 'Экспертный';
+  document.getElementById('fieldActive').value = ch ? String(ch.active) : 'true';
+  document.getElementById('overlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (!e || e.target.id === 'overlay') {
+    document.getElementById('overlay').classList.remove('open');
+  }
+}
+
+function editChannel(id) {
+  openModal(channels.find(c => c.id === id));
+}
+
+async function saveChannel() {
+  const btn = document.getElementById('saveBtn');
+  const id = document.getElementById('editId').value;
+  const data = {
+    name: document.getElementById('fieldName').value.trim(),
+    niche: document.getElementById('fieldNiche').value.trim(),
+    posts_per_day: parseInt(document.getElementById('fieldPosts').value),
+    tone: document.getElementById('fieldTone').value,
+    active: document.getElementById('fieldActive').value === 'true',
+  };
+  if (!data.name || !data.niche) { toast('Заполните все поля', 'error'); return; }
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Сохранение...';
+  try {
+    const url = id ? `/api/channels/${id}` : '/api/channels';
+    const method = id ? 'PUT' : 'POST';
+    await fetch(url, { method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
+    closeModal();
+    await loadChannels();
+    toast(id ? 'Канал обновлён' : 'Канал добавлен ✓', 'success');
+  } catch(e) {
+    toast('Ошибка сохранения', 'error');
+  }
+  btn.disabled = false;
+  btn.textContent = 'Сохранить';
+}
+
+async function deleteChannel(id) {
+  if (!confirm('Удалить канал?')) return;
+  await fetch(`/api/channels/${id}`, { method: 'DELETE' });
+  await loadChannels();
+  toast('Канал удалён');
+}
+
+async function generateNow(id, btn) {
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>';
+  try {
+    const res = await fetch(`/api/channels/${id}/generate`, { method: 'POST' });
+    const data = await res.json();
+    await loadChannels();
+    toast('Пост опубликован в RSS ✓', 'success');
+  } catch(e) {
+    toast('Ошибка генерации', 'error');
+  }
+  btn.disabled = false;
+  btn.textContent = '▶ Пост';
+}
+
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `toast show ${type}`;
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// Clock
+function updateClock() {
+  const now = new Date();
+  document.getElementById('headerTime').textContent =
+    now.toLocaleString('ru', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Init
+loadChannels();
+setInterval(loadChannels, 30000); // refresh every 30s
+</script>
+</body>
+</html>
