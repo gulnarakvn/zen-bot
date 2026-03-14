@@ -26,8 +26,6 @@
     font-family: 'IBM Plex Sans', sans-serif;
     min-height: 100vh;
   }
-
-  /* HEADER */
   header {
     border-bottom: 1px solid var(--border);
     padding: 0 32px;
@@ -52,11 +50,7 @@
   .logo-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
   .header-meta { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); }
-
-  /* LAYOUT */
   .container { max-width: 1200px; margin: 0 auto; padding: 32px; }
-
-  /* STATS BAR */
   .stats-bar {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -67,47 +61,14 @@
     overflow: hidden;
     margin-bottom: 32px;
   }
-  .stat {
-    background: var(--surface);
-    padding: 20px 24px;
-  }
+  .stat { background: var(--surface); padding: 20px 24px; }
   .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-family: 'IBM Plex Mono', monospace; margin-bottom: 6px; }
   .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--accent); line-height: 1; }
   .stat-value.green { color: var(--green); }
-
-  /* SECTION HEADER */
-  .section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .section-title {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .section-title { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; display: flex; align-items: center; gap: 8px; }
   .section-title::before { content: '//'; color: var(--accent); }
-
-  /* BUTTON */
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border-radius: 4px;
-    font-size: 13px;
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all .15s;
-    border: none;
-  }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 4px; font-size: 13px; font-family: 'IBM Plex Sans', sans-serif; font-weight: 500; cursor: pointer; transition: all .15s; border: none; }
   .btn-primary { background: var(--accent); color: #000; }
   .btn-primary:hover { background: var(--accent2); }
   .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
@@ -116,156 +77,41 @@
   .btn-danger:hover { background: #2a1515; }
   .btn-sm { padding: 5px 10px; font-size: 11px; }
   .btn:disabled { opacity: .4; cursor: not-allowed; }
-
-  /* CHANNEL CARDS */
   .channels-grid { display: flex; flex-direction: column; gap: 8px; }
-  .channel-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 20px 24px;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 16px;
-    align-items: center;
-    transition: border-color .2s;
-  }
+  .channel-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; transition: border-color .2s; }
   .channel-card:hover { border-color: #333; }
   .channel-card.inactive { opacity: .5; }
   .channel-name { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
   .channel-niche { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
-  .channel-meta {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-  .meta-tag {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
+  .channel-meta { display: flex; gap: 16px; flex-wrap: wrap; }
+  .meta-tag { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
   .meta-tag span { color: var(--text); }
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 2px 8px;
-    border-radius: 20px;
-    font-size: 10px;
-    font-family: 'IBM Plex Mono', monospace;
-    text-transform: uppercase;
-    letter-spacing: .5px;
-  }
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-family: 'IBM Plex Mono', monospace; text-transform: uppercase; letter-spacing: .5px; }
   .badge-active { background: #0d2a1a; color: var(--green); border: 1px solid #1a4a2a; }
   .badge-inactive { background: #2a1a0d; color: #888; border: 1px solid #3a2a1a; }
   .channel-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
-  .rss-link {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    color: var(--muted);
-    text-decoration: none;
-    border: 1px solid var(--border);
-    padding: 3px 8px;
-    border-radius: 3px;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-  }
+  .rss-link { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); text-decoration: none; border: 1px solid var(--border); padding: 3px 8px; border-radius: 3px; display: inline-flex; align-items: center; gap: 4px; }
   .rss-link:hover { color: var(--accent); border-color: var(--accent); }
-
-  /* MODAL */
-  .overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,.85);
-    z-index: 200;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity .2s;
-  }
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 200; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .2s; }
   .overlay.open { opacity: 1; pointer-events: all; }
-  .modal {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 32px;
-    width: 480px;
-    max-width: 95vw;
-    transform: translateY(20px);
-    transition: transform .2s;
-  }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 32px; width: 480px; max-width: 95vw; max-height: 90vh; overflow-y: auto; transform: translateY(20px); transition: transform .2s; }
   .overlay.open .modal { transform: translateY(0); }
-  .modal-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 24px;
-    letter-spacing: 2px;
-    margin-bottom: 24px;
-    color: var(--accent);
-  }
+  .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 2px; margin-bottom: 24px; color: var(--accent); }
   .form-group { margin-bottom: 16px; }
   .form-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-family: 'IBM Plex Mono', monospace; margin-bottom: 6px; display: block; }
-  .form-input, .form-select {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 10px 12px;
-    color: var(--text);
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 14px;
-    transition: border-color .15s;
-    outline: none;
-    -webkit-appearance: none;
-  }
+  .form-input, .form-select { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 10px 12px; color: var(--text); font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; transition: border-color .15s; outline: none; -webkit-appearance: none; }
   .form-input:focus, .form-select:focus { border-color: var(--accent); }
   .form-select option { background: var(--surface2); }
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .modal-actions { display: flex; gap: 10px; margin-top: 24px; justify-content: flex-end; }
-
-  /* TOAST */
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--accent);
-    padding: 12px 20px;
-    border-radius: 6px;
-    font-size: 13px;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all .3s;
-    z-index: 500;
-    pointer-events: none;
-  }
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); padding: 12px 20px; border-radius: 6px; font-size: 13px; opacity: 0; transform: translateY(10px); transition: all .3s; z-index: 500; pointer-events: none; }
   .toast.show { opacity: 1; transform: translateY(0); }
   .toast.success { border-left-color: var(--green); }
   .toast.error { border-left-color: var(--red); }
-
-  /* EMPTY STATE */
-  .empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--muted);
-  }
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
   .empty-state-icon { font-size: 48px; margin-bottom: 16px; opacity: .3; }
   .empty-state-text { font-size: 14px; margin-bottom: 20px; }
-
-  /* LOADING */
-  .spinner {
-    width: 14px; height: 14px;
-    border: 2px solid transparent;
-    border-top-color: currentColor;
-    border-radius: 50%;
-    animation: spin .6s linear infinite;
-    display: inline-block;
-  }
+  .spinner { width: 14px; height: 14px; border: 2px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: spin .6s linear infinite; display: inline-block; }
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
@@ -280,27 +126,12 @@
 </header>
 
 <div class="container">
-  <!-- Stats -->
   <div class="stats-bar">
-    <div class="stat">
-      <div class="stat-label">Каналов</div>
-      <div class="stat-value" id="statChannels">0</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">Активных</div>
-      <div class="stat-value green" id="statActive">0</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">Постов сегодня</div>
-      <div class="stat-value" id="statToday">0</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">Всего постов</div>
-      <div class="stat-value" id="statTotal">0</div>
-    </div>
+    <div class="stat"><div class="stat-label">Каналов</div><div class="stat-value" id="statChannels">0</div></div>
+    <div class="stat"><div class="stat-label">Активных</div><div class="stat-value green" id="statActive">0</div></div>
+    <div class="stat"><div class="stat-label">Постов сегодня</div><div class="stat-value" id="statToday">0</div></div>
+    <div class="stat"><div class="stat-label">Всего постов</div><div class="stat-value" id="statTotal">0</div></div>
   </div>
-
-  <!-- Channels -->
   <div class="section-header">
     <div class="section-title">Каналы</div>
     <button class="btn btn-primary" onclick="openModal()">+ Добавить канал</button>
@@ -308,7 +139,6 @@
   <div class="channels-grid" id="channelsList"></div>
 </div>
 
-<!-- Modal -->
 <div class="overlay" id="overlay" onclick="closeModal(event)">
   <div class="modal">
     <div class="modal-title" id="modalTitle">НОВЫЙ КАНАЛ</div>
@@ -342,6 +172,14 @@
       </div>
     </div>
     <div class="form-group">
+      <label class="form-label">Telegram канал (например @burenie_pro)</label>
+      <input type="text" class="form-input" id="fieldTgChannel" placeholder="@название_канала">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Telegram Bot Token</label>
+      <input type="text" class="form-input" id="fieldBotToken" placeholder="7xxxxxxxxx:AAF...">
+    </div>
+    <div class="form-group">
       <label class="form-label">Статус</label>
       <select class="form-select" id="fieldActive">
         <option value="true">Активен</option>
@@ -355,7 +193,6 @@
   </div>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
 <script>
@@ -378,10 +215,7 @@ function updateStats() {
 function renderChannels() {
   const el = document.getElementById('channelsList');
   if (!channels.length) {
-    el.innerHTML = `<div class="empty-state">
-      <div class="empty-state-icon">📡</div>
-      <div class="empty-state-text">Каналов пока нет. Добавьте первый!</div>
-    </div>`;
+    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📡</div><div class="empty-state-text">Каналов пока нет. Добавьте первый!</div></div>`;
     return;
   }
   el.innerHTML = channels.map(ch => {
@@ -395,6 +229,7 @@ function renderChannels() {
         </div>
         <div class="channel-niche">${ch.niche}</div>
         <div class="channel-meta">
+          <div class="meta-tag">канал <span>${ch.telegram_channel || '—'}</span></div>
           <div class="meta-tag">постов/день <span>${ch.posts_per_day}</span></div>
           <div class="meta-tag">тон <span>${ch.tone}</span></div>
           <div class="meta-tag">сегодня <span>${ch.posts_today || 0}</span></div>
@@ -420,6 +255,8 @@ function openModal(ch = null) {
   document.getElementById('fieldPosts').value = ch ? ch.posts_per_day : '6';
   document.getElementById('fieldTone').value = ch ? ch.tone : 'Экспертный';
   document.getElementById('fieldActive').value = ch ? String(ch.active) : 'true';
+  document.getElementById('fieldTgChannel').value = ch ? (ch.telegram_channel || '') : '';
+  document.getElementById('fieldBotToken').value = '';
   document.getElementById('overlay').classList.add('open');
 }
 
@@ -442,6 +279,8 @@ async function saveChannel() {
     posts_per_day: parseInt(document.getElementById('fieldPosts').value),
     tone: document.getElementById('fieldTone').value,
     active: document.getElementById('fieldActive').value === 'true',
+    telegram_channel: document.getElementById('fieldTgChannel').value.trim() || null,
+    bot_token: document.getElementById('fieldBotToken').value.trim() || null,
   };
   if (!data.name || !data.niche) { toast('Заполните все поля', 'error'); return; }
   btn.disabled = true;
@@ -474,7 +313,7 @@ async function generateNow(id, btn) {
     const res = await fetch(`/api/channels/${id}/generate`, { method: 'POST' });
     const data = await res.json();
     await loadChannels();
-    toast('Пост опубликован в RSS ✓', 'success');
+    toast('Пост опубликован ✓', 'success');
   } catch(e) {
     toast('Ошибка генерации', 'error');
   }
@@ -489,7 +328,6 @@ function toast(msg, type = '') {
   setTimeout(() => el.classList.remove('show'), 3000);
 }
 
-// Clock
 function updateClock() {
   const now = new Date();
   document.getElementById('headerTime').textContent =
@@ -498,9 +336,11 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
-// Init
 loadChannels();
-setInterval(loadChannels, 30000); // refresh every 30s
+setInterval(loadChannels, 30000);
 </script>
 </body>
 </html>
+ 
+  
+
