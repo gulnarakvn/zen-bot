@@ -16,14 +16,39 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHANNEL = os.getenv("TELEGRAM_CHANNEL", "")
 UNSPLASH_ACCESS_KEY = os.getenv("UNSPLASH_ACCESS_KEY", "")
 
+UNSPLASH_KEYWORDS = {
+    "мод": "fashion style outfit",
+    "тренд": "fashion trends clothing",
+    "гардероб": "capsule wardrobe style",
+    "стиль": "fashion style elegant",
+    "одежд": "clothing fashion",
+    "люкс": "luxury fashion",
+    "образ": "fashion outfit lookbook",
+    "бурени": "water well drilling",
+    "скважин": "water well pump",
+    "водоснабжени": "water supply house",
+    "отоплени": "home heating",
+    "кровл": "roofing house",
+    "потолк": "interior ceiling design",
+    "ремонт": "home renovation interior",
+}
+
+def get_unsplash_query(niche: str) -> str:
+    niche_lower = niche.lower()
+    for keyword, english in UNSPLASH_KEYWORDS.items():
+        if keyword in niche_lower:
+            return english
+    return niche
+
 async def get_image_url(query: str) -> str | None:
     if not UNSPLASH_ACCESS_KEY:
         return None
     try:
+        english_query = get_unsplash_query(query)
         async with httpx.AsyncClient(timeout=10) as client:
             resp = await client.get(
                 "https://api.unsplash.com/photos/random",
-                params={"query": query, "orientation": "landscape"},
+                params={"query": english_query, "orientation": "landscape"},
                 headers={"Authorization": f"Client-ID {UNSPLASH_ACCESS_KEY}"}
             )
             data = resp.json()
@@ -87,7 +112,6 @@ class ChannelUpdate(BaseModel):
 
 @app.get("/api/channels")
 def get_channels():
-    # hide bot tokens from response
     channels = load_channels()
     safe = []
     for ch in channels:
