@@ -32,22 +32,20 @@ async def get_image_url(query: str) -> str | None:
         print(f"[unsplash] error: {e}")
         return None
 
-async def send_telegram(text: str, channel: str = None, image_url: str = None):
-    token = TELEGRAM_BOT_TOKEN
-    chat_id = channel or TELEGRAM_CHANNEL
-    if not token or not chat_id:
+async def send_telegram(text: str, channel: str, token: str, image_url: str = None):
+    if not token or not channel:
         return
     try:
         async with httpx.AsyncClient(timeout=15) as client:
             if image_url:
                 await client.post(
                     f"https://api.telegram.org/bot{token}/sendPhoto",
-                    json={"chat_id": chat_id, "photo": image_url, "caption": text, "parse_mode": "HTML"}
+                    json={"chat_id": channel, "photo": image_url, "caption": text, "parse_mode": "HTML"}
                 )
             else:
                 await client.post(
                     f"https://api.telegram.org/bot{token}/sendMessage",
-                    json={"chat_id": chat_id, "text": text, "parse_mode": "HTML"}
+                    json={"chat_id": channel, "text": text, "parse_mode": "HTML"}
                 )
     except Exception as e:
         print(f"[telegram] error: {e}")
@@ -75,6 +73,8 @@ class ChannelCreate(BaseModel):
     posts_per_day: int = 6
     tone: str = "Экспертный"
     active: bool = True
+    bot_token: Optional[str] = None
+    telegram_channel: Optional[str] = None
 
 class ChannelUpdate(BaseModel):
     name: Optional[str] = None
@@ -82,10 +82,20 @@ class ChannelUpdate(BaseModel):
     posts_per_day: Optional[int] = None
     tone: Optional[str] = None
     active: Optional[bool] = None
+    bot_token: Optional[str] = None
+    telegram_channel: Optional[str] = None
 
 @app.get("/api/channels")
 def get_channels():
-    return load_channels()
+    # hide bot tokens from response
+    channels = load_channels()
+    safe = []
+    for ch in channels:
+        c = dict(ch)
+        if c.get("bot_token"):
+            c["bot_token"] = "***"
+        safe.append(c)
+    return safe
 
 @app.post("/api/channels")
 def create_channel(data: ChannelCreate):
@@ -100,6 +110,8 @@ def create_channel(data: ChannelCreate):
         "posts_per_day": data.posts_per_day,
         "tone": data.tone,
         "active": data.active,
+        "bot_token": data.bot_token or TELEGRAM_BOT_TOKEN,
+        "telegram_channel": data.telegram_channel or TELEGRAM_CHANNEL,
         "created_at": datetime.utcnow().isoformat(),
         "posts_today": 0,
         "total_posts": 0,
@@ -180,10 +192,11 @@ async def run_channel(ch: dict, channels: list):
     build_rss(ch, items)
 
     tg_channel = ch.get("telegram_channel") or TELEGRAM_CHANNEL
-    if tg_channel:
+    tg_token = ch.get("bot_token") or TELEGRAM_BOT_TOKEN
+    if tg_channel and tg_token:
         tg_text = f"<b>{post['title']}</b>\n\n{post['body']}"
         image_url = await get_image_url(ch["niche"])
-        await send_telegram(tg_text, tg_channel, image_url)
+        await send_telegram(tg_text, tg_channel, tg_token, image_url)
 
     for c in channels:
         if c["id"] == ch["id"]:
